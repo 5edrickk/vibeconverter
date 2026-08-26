@@ -69,6 +69,9 @@ export default function CurrencyPage() {
   const [rates, setRates] = useState<LatestRates | null>(null);
   const [ratesError, setRatesError] = useState<string | null>(null);
 
+  const [fromOpen, setFromOpen] = useState(false);
+  const [toOpen, setToOpen] = useState(false);
+
   const [start, setStart] = useState<string>(isoDaysAgo(30));
   const [end, setEnd] = useState<string>(today());
   const [history, setHistory] = useState<History | null>(null);
@@ -211,14 +214,27 @@ export default function CurrencyPage() {
         >
           <Stack spacing={1.75}>
             <Typography sx={fieldLabelSx}>From</Typography>
-            <Autocomplete
-              options={codes}
-              value={from}
-              onChange={(_e, v) => v && setFrom(v)}
-              disableClearable
-              size="small"
-              renderInput={(params) => <TextField {...params} />}
-            />
+            <Box
+              onMouseDownCapture={(e) => {
+                if (fromOpen) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setFromOpen(false);
+                }
+              }}
+            >
+              <Autocomplete
+                open={fromOpen}
+                onOpen={() => setFromOpen(true)}
+                onClose={() => setFromOpen(false)}
+                options={codes}
+                value={from}
+                onChange={(_e, v) => v && setFrom(v)}
+                disableClearable
+                size="small"
+                renderInput={(params) => <TextField {...params} />}
+              />
+            </Box>
             <TextField
               type="number"
               value={amount}
@@ -251,14 +267,27 @@ export default function CurrencyPage() {
 
           <Stack spacing={1.75}>
             <Typography sx={fieldLabelSx}>To</Typography>
-            <Autocomplete
-              options={codes}
-              value={to}
-              onChange={(_e, v) => v && setTo(v)}
-              disableClearable
-              size="small"
-              renderInput={(params) => <TextField {...params} />}
-            />
+            <Box
+              onMouseDownCapture={(e) => {
+                if (toOpen) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setToOpen(false);
+                }
+              }}
+            >
+              <Autocomplete
+                open={toOpen}
+                onOpen={() => setToOpen(true)}
+                onClose={() => setToOpen(false)}
+                options={codes}
+                value={to}
+                onChange={(_e, v) => v && setTo(v)}
+                disableClearable
+                size="small"
+                renderInput={(params) => <TextField {...params} />}
+              />
+            </Box>
             <Box
               sx={{
                 bgcolor: colors.bg,
