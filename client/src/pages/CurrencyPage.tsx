@@ -250,6 +250,17 @@ export default function CurrencyPage() {
                   padding: "14px 4px",
                 },
               }}
+              sx={{
+                "& input[type=number]": { MozAppearance: "textfield" },
+                "& input[type=number]::-webkit-outer-spin-button": {
+                  WebkitAppearance: "none",
+                  margin: 0,
+                },
+                "& input[type=number]::-webkit-inner-spin-button": {
+                  WebkitAppearance: "none",
+                  margin: 0,
+                },
+              }}
             />
           </Stack>
 
