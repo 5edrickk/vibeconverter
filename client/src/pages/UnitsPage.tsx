@@ -2,20 +2,17 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
-  Card,
-  CardContent,
   CircularProgress,
   IconButton,
   MenuItem,
   Stack,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Tooltip,
   Typography,
 } from "@mui/material";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import { api, Category, UnitConvertResult } from "../api";
+import { colors, fontMono } from "../theme";
 
 function formatNumber(n: number): string {
   if (!Number.isFinite(n)) return "-";
@@ -81,8 +78,7 @@ export default function UnitsPage() {
     };
   }, [category, from, to, value]);
 
-  const handleCategoryChange = (_e: unknown, next: string | null) => {
-    if (!next) return;
+  const selectCategory = (next: string) => {
     const cat = categories.find((c) => c.id === next);
     if (!cat) return;
     setCategoryId(next);
@@ -100,91 +96,182 @@ export default function UnitsPage() {
   const toUnit = category?.units.find((u) => u.id === to);
 
   return (
-    <Stack spacing={3}>
-      <Typography variant="h4">Unit conversion</Typography>
-
-      {error && <Alert severity="error">{error}</Alert>}
-
-      <ToggleButtonGroup
-        value={categoryId}
-        exclusive
-        onChange={handleCategoryChange}
-        color="primary"
-        sx={{ flexWrap: "wrap" }}
+    <Box>
+      <Typography
+        sx={{
+          fontFamily: fontMono,
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: colors.accent,
+          mb: 1.75,
+        }}
       >
-        {categories.map((c) => (
-          <ToggleButton key={c.id} value={c.id}>
-            {c.label}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
+        Unit Conversion
+      </Typography>
+      <Typography
+        sx={{
+          fontWeight: 600,
+          fontSize: { xs: 26, sm: 34 },
+          lineHeight: 1.2,
+          color: colors.text,
+          mb: 5,
+          maxWidth: 640,
+        }}
+      >
+        Convert between length, volume, weight, temperature and area.
+      </Typography>
 
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center">
-        <TextField
-          label="Amount"
-          type="number"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          select
-          label="From"
-          value={from}
-          onChange={(e) => setFrom(e.target.value)}
-          fullWidth
-        >
-          {category?.units.map((u) => (
-            <MenuItem key={u.id} value={u.id}>
-              {u.label} ({u.symbol})
-            </MenuItem>
-          ))}
-        </TextField>
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
 
-        <Tooltip title="Swap">
-          <IconButton onClick={swap} color="primary" aria-label="swap units">
-            <SwapHorizIcon />
-          </IconButton>
-        </Tooltip>
-
-        <TextField
-          select
-          label="To"
-          value={to}
-          onChange={(e) => setTo(e.target.value)}
-          fullWidth
-        >
-          {category?.units.map((u) => (
-            <MenuItem key={u.id} value={u.id}>
-              {u.label} ({u.symbol})
-            </MenuItem>
-          ))}
-        </TextField>
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 4 }}>
+        {categories.map((c) => {
+          const active = c.id === categoryId;
+          return (
+            <Box
+              key={c.id}
+              component="button"
+              onClick={() => selectCategory(c.id)}
+              sx={{
+                border: active ? "none" : `1px solid ${colors.borderStrong}`,
+                cursor: "pointer",
+                fontFamily: fontMono,
+                fontSize: 13,
+                fontWeight: active ? 600 : 500,
+                letterSpacing: "0.03em",
+                textTransform: "uppercase",
+                borderRadius: "4px",
+                px: 2.25,
+                py: 1.25,
+                bgcolor: active ? colors.accent : "transparent",
+                color: active ? colors.bg : colors.textSecondary,
+              }}
+            >
+              {c.label}
+            </Box>
+          );
+        })}
       </Stack>
 
-      <Card variant="outlined">
-        <CardContent>
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
-              <CircularProgress size={28} />
-            </Box>
-          ) : result ? (
-            <Stack spacing={1}>
-              <Typography variant="h5">
-                {formatNumber(result.value)} {fromUnit?.symbol} ={" "}
-                {formatNumber(result.result)} {toUnit?.symbol}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {result.formula}
-              </Typography>
-            </Stack>
-          ) : (
-            <Typography color="text.secondary">
-              Enter an amount to see the conversion.
+      <Box sx={{ bgcolor: colors.bgElevated, border: `1px solid ${colors.border}`, borderRadius: 2, p: { xs: 3, sm: 5 } }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr auto 1fr" },
+            gap: { xs: 3, sm: 3.5 },
+            alignItems: "end",
+          }}
+        >
+          <Stack spacing={1.75}>
+            <Typography
+              sx={{ fontFamily: fontMono, fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: colors.textMuted }}
+            >
+              From
             </Typography>
-          )}
-        </CardContent>
-      </Card>
-    </Stack>
+            <TextField
+              select
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              fullWidth
+              size="small"
+            >
+              {category?.units.map((u) => (
+                <MenuItem key={u.id} value={u.id}>
+                  {u.label} ({u.symbol})
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              type="number"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              fullWidth
+              inputProps={{
+                style: {
+                  fontFamily: fontMono,
+                  fontSize: 32,
+                  fontWeight: 600,
+                  textAlign: "right",
+                  color: colors.text,
+                  padding: "14px 4px",
+                },
+              }}
+            />
+          </Stack>
+
+          <Box sx={{ display: "flex", justifyContent: "center", pb: { xs: 0, sm: 0.5 } }}>
+            <Tooltip title="Swap">
+              <IconButton
+                onClick={swap}
+                aria-label="swap units"
+                sx={{
+                  width: 52,
+                  height: 52,
+                  border: `1.5px solid ${colors.accent}`,
+                  color: colors.accent,
+                }}
+              >
+                <SwapHorizIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+
+          <Stack spacing={1.75}>
+            <Typography
+              sx={{ fontFamily: fontMono, fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: colors.textMuted }}
+            >
+              To
+            </Typography>
+            <TextField
+              select
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              fullWidth
+              size="small"
+            >
+              {category?.units.map((u) => (
+                <MenuItem key={u.id} value={u.id}>
+                  {u.label} ({u.symbol})
+                </MenuItem>
+              ))}
+            </TextField>
+            <Box
+              sx={{
+                bgcolor: colors.bg,
+                border: `1px solid ${colors.borderStrong}`,
+                borderRadius: "6px",
+                px: "16px",
+                py: "14px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                minHeight: 56,
+              }}
+            >
+              {loading ? (
+                <CircularProgress size={22} sx={{ color: colors.accent }} />
+              ) : (
+                <Typography sx={{ fontFamily: fontMono, fontSize: 32, fontWeight: 600, color: colors.accent }}>
+                  {result ? formatNumber(result.result) : "–"}
+                </Typography>
+              )}
+            </Box>
+          </Stack>
+        </Box>
+
+        <Box sx={{ mt: 3.5, pt: 3, borderTop: `1px solid ${colors.border}` }}>
+          <Typography sx={{ fontFamily: fontMono, fontSize: 13, color: colors.textMuted }}>
+            {result
+              ? `${formatNumber(result.value)} ${fromUnit?.symbol} = ${formatNumber(result.result)} ${toUnit?.symbol} · ${result.formula}`
+              : "Enter an amount to see the conversion."}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
   );
 }
