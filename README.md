@@ -1,5 +1,7 @@
 # Converter App
 
+![Vibe Converter advertisement](assets/vibeconverter_ad.gif)
+
 A two-section web app:
 
 1. **Units** - local conversions (length, volume, weight, temperature, area).
