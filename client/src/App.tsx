@@ -8,12 +8,17 @@ import { colors, fontDisplay, fontMono } from "./theme";
 const NAV_ITEMS = [
   { label: "Units", value: "/units" },
   { label: "Currency", value: "/currency" },
+  { label: "Time", value: "/timezone" },
 ];
 
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const current = location.pathname.startsWith("/currency") ? "/currency" : "/units";
+  const current = location.pathname.startsWith("/currency")
+    ? "/currency"
+    : location.pathname.startsWith("/timezone")
+    ? "/timezone"
+    : "/units";
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
@@ -96,6 +101,14 @@ export default function App() {
           <Route path="/" element={<Navigate to="/units" replace />} />
           <Route path="/units" element={<UnitsPage />} />
           <Route path="/currency" element={<CurrencyPage />} />
+          <Route
+            path="/timezone"
+            element={
+              <Typography sx={{ color: "text.secondary" }}>
+                Time conversion coming soon.
+              </Typography>
+            }
+          />
           <Route path="*" element={<Navigate to="/units" replace />} />
         </Routes>
       </Box>

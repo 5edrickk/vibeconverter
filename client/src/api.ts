@@ -49,6 +49,26 @@ export interface History {
   points: { date: string; rate: number }[];
 }
 
+export interface Zone {
+  id: string;
+  label: string;
+  region: string;
+  offset: string;
+}
+
+export interface TimezoneConvertResult {
+  from: string;
+  to: string;
+  utc: string;
+  datetimeFrom: string;
+  datetimeTo: string;
+  fromOffset: string;
+  toOffset: string;
+  fromAbbr: string;
+  toAbbr: string;
+  differenceMinutes: number;
+}
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, init);
   const data = await res.json().catch(() => null);
@@ -81,5 +101,14 @@ export const api = {
   getHistory: (from: string, to: string, start: string, end: string) =>
     request<History>(
       `/api/currency/history?from=${from}&to=${to}&start=${start}&end=${end}`
+    ),
+
+  getTimezones: () => request<Zone[]>("/api/timezone/zones"),
+
+  convertTimezone: (from: string, to: string, datetime: string) =>
+    request<TimezoneConvertResult>(
+      `/api/timezone/convert?from=${encodeURIComponent(from)}&to=${encodeURIComponent(
+        to
+      )}&datetime=${encodeURIComponent(datetime)}`
     ),
 };
