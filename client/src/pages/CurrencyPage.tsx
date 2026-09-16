@@ -26,14 +26,21 @@ import {
 } from "../api";
 import { colors, fontMono } from "../theme";
 
+/** YYYY-MM-DD in the browser's timezone (toISOString would shift to UTC). */
+function toLocalIso(d: Date): string {
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${month}-${day}`;
+}
+
 function isoDaysAgo(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() - days);
-  return d.toISOString().slice(0, 10);
+  return toLocalIso(d);
 }
 
 function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toLocalIso(new Date());
 }
 
 function formatNumber(n: number, digits = 4): string {
@@ -77,8 +84,18 @@ export default function CurrencyPage() {
   const [history, setHistory] = useState<History | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  // Bumped by the Load button so the history effect re-runs with the current dates.
+  const [historyRequest, setHistoryRequest] = useState(0);
 
   const codes = useMemo(() => currencies.map((c) => c.code), [currencies]);
+
+  // ISO dates compare correctly as plain strings.
+  const dateRangeError = useMemo(() => {
+    if (!start || !end) return "Pick a start and an end date";
+    if (start > end) return "The start date must be on or before the end date";
+    if (end > today()) return "The end date cannot be in the future";
+    return null;
+  }, [start, end]);
 
   useEffect(() => {
     api
@@ -87,56 +104,87 @@ export default function CurrencyPage() {
       .catch((e) => setConvertError(e.message));
   }, []);
 
-  const runConvert = () => {
+  useEffect(() => {
+    if (!from || !to) return;
     const numeric = Number(amount);
-    if (!Number.isFinite(numeric)) {
-      setConvertError("Enter a valid amount");
+    if (amount.trim() === "" || !Number.isFinite(numeric)) {
+      setResult(null);
+      setConvertError(amount.trim() === "" ? null : "Enter a valid amount");
       return;
     }
+
+    // `cancelled` keeps a slow answer from overwriting a newer one.
+    let cancelled = false;
     setConverting(true);
     setConvertError(null);
     api
       .convertCurrency(from, to, numeric)
-      .then(setResult)
-      .catch((e) => {
-        setConvertError(e.message);
-        setResult(null);
+      .then((r) => {
+        if (!cancelled) setResult(r);
       })
-      .finally(() => setConverting(false));
-  };
-
-  useEffect(() => {
-    if (!from || !to) return;
-    runConvert();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to]);
+      .catch((e) => {
+        if (!cancelled) {
+          setConvertError(e.message);
+          setResult(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setConverting(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [from, to, amount]);
 
   useEffect(() => {
     if (!from) return;
+    let cancelled = false;
     setRatesError(null);
     api
       .getRates(from)
-      .then(setRates)
-      .catch((e) => setRatesError(e.message));
+      .then((r) => {
+        if (!cancelled) setRates(r);
+      })
+      .catch((e) => {
+        if (!cancelled) setRatesError(e.message);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [from]);
 
-  const loadHistory = () => {
+  useEffect(() => {
+    if (!from || !to) return;
+    if (dateRangeError) {
+      setHistory(null);
+      setHistoryError(null);
+      setHistoryLoading(false);
+      return;
+    }
+
+    let cancelled = false;
     setHistoryLoading(true);
     setHistoryError(null);
     api
       .getHistory(from, to, start, end)
-      .then(setHistory)
-      .catch((e) => {
-        setHistoryError(e.message);
-        setHistory(null);
+      .then((h) => {
+        if (!cancelled) setHistory(h);
       })
-      .finally(() => setHistoryLoading(false));
-  };
-
-  useEffect(() => {
-    loadHistory();
+      .catch((e) => {
+        if (!cancelled) {
+          setHistoryError(e.message);
+          setHistory(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setHistoryLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // `start`/`end` are read on purpose only when Load bumps `historyRequest`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to]);
+  }, [from, to, historyRequest, dateRangeError]);
 
   const swap = () => {
     setFrom(to);
@@ -344,18 +392,21 @@ export default function CurrencyPage() {
               size="small"
               value={start}
               onChange={(e) => setStart(e.target.value)}
-              inputProps={{ style: { fontFamily: fontMono, fontSize: 13 } }}
+              error={Boolean(dateRangeError)}
+              inputProps={{ max: end || today(), style: { fontFamily: fontMono, fontSize: 13 } }}
             />
             <TextField
               type="date"
               size="small"
               value={end}
               onChange={(e) => setEnd(e.target.value)}
-              inputProps={{ style: { fontFamily: fontMono, fontSize: 13 } }}
+              error={Boolean(dateRangeError)}
+              inputProps={{ min: start, max: today(), style: { fontFamily: fontMono, fontSize: 13 } }}
             />
             <Box
               component="button"
-              onClick={loadHistory}
+              onClick={() => setHistoryRequest((n) => n + 1)}
+              disabled={Boolean(dateRangeError)}
               sx={{
                 border: `1px solid ${colors.accent}`,
                 bgcolor: "transparent",
@@ -370,11 +421,22 @@ export default function CurrencyPage() {
                 letterSpacing: "0.03em",
                 cursor: "pointer",
                 flexShrink: 0,
+                "&:disabled": {
+                  borderColor: colors.border,
+                  color: colors.textMuted,
+                  cursor: "not-allowed",
+                },
               }}
             >
               Load
             </Box>
           </Stack>
+
+          {dateRangeError && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              {dateRangeError}
+            </Alert>
+          )}
 
           {historyError && (
             <Alert severity="error" sx={{ mb: 2 }}>
