@@ -8,3 +8,8 @@ npm-debug.log*
 .DS_Store
 coverage/
 .vite/
+.claude/*
+lab2.md
+lab3.md
+pr-time-conversion.md
+
