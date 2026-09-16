@@ -2,10 +2,11 @@
 
 ![Vibe Converter advertisement](assets/vibeconverter_ad.gif)
 
-A two-section web app:
+A three-section web app:
 
 1. **Units** - local conversions (length, volume, weight, temperature, area).
 2. **Currency** - live money conversion via the public [Frankfurter](https://frankfurter.dev/) FX API, plus latest-rates and 30-day history tables.
+3. **Time** - convert a date and time between IANA timezones using the native `Intl` API (no extra dependencies), plus a live world clock for major cities.
 
 ## Stack
 
@@ -36,3 +37,7 @@ The Vite dev server proxies `/api` to the backend, so no CORS setup is needed in
 - `GET /api/currency/convert?from=USD&to=EUR&amount=10`
 - `GET /api/currency/rates?base=USD` - latest rates
 - `GET /api/currency/history?from=USD&to=EUR&start=YYYY-MM-DD&end=YYYY-MM-DD`
+
+### Timezone
+- `GET /api/timezone/zones` - IANA timezone list with current UTC offsets
+- `GET /api/timezone/convert?from=America/New_York&to=Europe/Paris&datetime=YYYY-MM-DDTHH:mm` - convert a wall-clock datetime between zones
