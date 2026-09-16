@@ -3,6 +3,7 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import UnitsPage from "./pages/UnitsPage";
 import CurrencyPage from "./pages/CurrencyPage";
+import TimezonePage from "./pages/TimezonePage";
 import { colors, fontDisplay, fontMono } from "./theme";
 
 const NAV_ITEMS = [
@@ -101,14 +102,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/units" replace />} />
           <Route path="/units" element={<UnitsPage />} />
           <Route path="/currency" element={<CurrencyPage />} />
-          <Route
-            path="/timezone"
-            element={
-              <Typography sx={{ color: "text.secondary" }}>
-                Time conversion coming soon.
-              </Typography>
-            }
-          />
+          <Route path="/timezone" element={<TimezonePage />} />
           <Route path="*" element={<Navigate to="/units" replace />} />
         </Routes>
       </Box>
