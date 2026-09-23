@@ -21,23 +21,34 @@ npm install
 npm run dev
 ```
 
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:3001
+- Frontend: [http://localhost:5173](http://localhost:5173)
+- Backend API: [http://localhost:3001](http://localhost:3001)
 
 The Vite dev server proxies `/api` to the backend, so no CORS setup is needed in the browser.
 
 ## API
 
 ### Units
+
 - `GET /api/units/categories` - categories and their units
 - `POST /api/units/convert` - body `{ category, from, to, value }` -> `{ result, formula }`
 
 ### Currency (proxied to Frankfurter v2)
+
 - `GET /api/currency/currencies` - supported currency codes
 - `GET /api/currency/convert?from=USD&to=EUR&amount=10`
 - `GET /api/currency/rates?base=USD` - latest rates
 - `GET /api/currency/history?from=USD&to=EUR&start=YYYY-MM-DD&end=YYYY-MM-DD`
 
 ### Timezone
+
 - `GET /api/timezone/zones` - IANA timezone list with current UTC offsets
 - `GET /api/timezone/convert?from=America/New_York&to=Europe/Paris&datetime=YYYY-MM-DDTHH:mm` - convert a wall-clock datetime between zones
+
+heroku
+
+azure (umas 4)
+
+aws
+
+oracle
