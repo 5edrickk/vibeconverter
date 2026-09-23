@@ -91,7 +91,20 @@ client/src
 
 ### Health
 
-- `GET /api/health` -> `{ status: "ok" }`
+- `GET /health` (also `/api/health`, for the Vite proxy) ->
+  `{ status: "ok", uptimeSeconds, startedAt, timestamp, node, memoryMb }`
+
+To check that the app is up, run `npm run health` (defaults to
+`http://localhost:3001/health`) or pass another URL:
+`npm run health -- http://<host>:3001/health`. It prints `HEALTHY` and exits
+`0`, or prints `UNHEALTHY`/`UNREACHABLE` and exits `1`.
+
+### Logging
+
+The server writes one timestamped line per request (method, path, status,
+duration). 4xx responses are logged as `WARN` and 5xx as `ERROR`; startup,
+unhandled rejections and uncaught exceptions are logged too. On the VM, read
+them with `pm2 logs vibeconverter`.
 
 ## Recent changes
 

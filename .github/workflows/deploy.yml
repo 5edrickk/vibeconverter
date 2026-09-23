@@ -23,3 +23,14 @@ jobs:
           pm2 delete vibeconverter || true
           pm2 start "npm start --workspace server" --name vibeconverter
           pm2 save
+
+      - name: Health check
+        run: |
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            npm run health && exit 0
+            echo "Attempt $i failed, retrying in 3s..."
+            sleep 3
+          done
+          echo "Application did not become healthy, recent logs:"
+          pm2 logs vibeconverter --lines 50 --nostream
+          exit 1
