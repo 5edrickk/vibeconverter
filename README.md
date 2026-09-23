@@ -37,21 +37,21 @@ npm install   # installs both workspaces from the root
 npm run dev   # starts the API and the frontend together
 ```
 
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:3001
+- Frontend: [http://localhost:5173](http://localhost:5173)
+- Backend API: [http://localhost:3001](http://localhost:3001)
 
 The Vite dev server proxies `/api` to the backend, so no CORS setup is needed in
 the browser.
 
 ### Scripts
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Runs server and client together via `concurrently` |
-| `npm run dev:server` | API only, with reload on change (`tsx watch`) |
-| `npm run dev:client` | Vite dev server only |
-| `npm run build` | Type-checks and builds both workspaces |
-| `npm start --workspace server` | Runs the compiled API from `server/dist` |
+| Command                        | What it does                                       |
+| ------------------------------ | -------------------------------------------------- |
+| `npm run dev`                  | Runs server and client together via `concurrently` |
+| `npm run dev:server`           | API only, with reload on change (`tsx watch`)      |
+| `npm run dev:client`           | Vite dev server only                               |
+| `npm run build`                | Type-checks and builds both workspaces             |
+| `npm start --workspace server` | Runs the compiled API from `server/dist`           |
 
 The API port can be overridden with the `PORT` environment variable.
 
@@ -73,20 +73,24 @@ client/src
 ## API
 
 ### Units
+
 - `GET /api/units/categories` - categories and their units
 - `POST /api/units/convert` - body `{ category, from, to, value }` -> `{ result, formula }`
 
 ### Currency (proxied to Frankfurter v2)
+
 - `GET /api/currency/currencies` - supported currency codes
 - `GET /api/currency/convert?from=USD&to=EUR&amount=10`
 - `GET /api/currency/rates?base=USD` - latest rates
 - `GET /api/currency/history?from=USD&to=EUR&start=YYYY-MM-DD&end=YYYY-MM-DD`
 
 ### Timezone
+
 - `GET /api/timezone/zones` - IANA timezone list with current UTC offsets
 - `GET /api/timezone/convert?from=America/New_York&to=Europe/Paris&datetime=YYYY-MM-DDTHH:mm` - convert a wall-clock datetime between zones
 
 ### Health
+
 - `GET /api/health` -> `{ status: "ok" }`
 
 ## Recent changes
@@ -105,3 +109,11 @@ specific date so DST is respected, and show a live world clock.
   longer jumps to tomorrow in the evening;
 - the history range is validated - an inverted range or a future end date shows
   a warning, disables **Load** and skips the request.
+
+heroku
+
+azure (umas 4)
+
+aws
+
+oracles

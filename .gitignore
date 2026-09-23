@@ -9,7 +9,5 @@ npm-debug.log*
 coverage/
 .vite/
 .claude/*
-lab2.md
-lab3.md
-pr-time-conversion.md
+remise.md
 
